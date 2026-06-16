@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Edit Transaction</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="form-container">
+
+<h1>✏ Edit Transaction</h1>
+
+<form method="POST" action="/edit/{{transaction.id}}">
+
+<label>Title</label>
+
+<input
+type="text"
+name="title"
+value="{{transaction.title}}"
+required>
+
+
+<label>Amount</label>
+
+<input
+type="number"
+name="amount"
+value="{{transaction.amount}}"
+required>
+
+
+<label>Category</label>
+
+<select name="category" required>
+
+<option value="Food"
+{% if transaction.category=="Food" %}selected{% endif %}>
+Food
+</option>
+
+<option value="Travel"
+{% if transaction.category=="Travel" %}selected{% endif %}>
+Travel
+</option>
+
+<option value="Shopping"
+{% if transaction.category=="Shopping" %}selected{% endif %}>
+Shopping
+</option>
+
+<option value="Education"
+{% if transaction.category=="Education" %}selected{% endif %}>
+Education
+</option>
+
+<option value="Bills"
+{% if transaction.category=="Bills" %}selected{% endif %}>
+Bills
+</option>
+
+<option value="Entertainment"
+{% if transaction.category=="Entertainment" %}selected{% endif %}>
+Entertainment
+</option>
+
+<option value="Other"
+{% if transaction.category=="Other" %}selected{% endif %}>
+Other
+</option>
+
+</select>
+
+
+
+<label>Type</label>
+
+<select name="type" required>
+
+<option value="Expense"
+{% if transaction.type=="Expense" %}selected{% endif %}>
+Expense
+</option>
+
+<option value="Income"
+{% if transaction.type=="Income" %}selected{% endif %}>
+Income
+</option>
+
+</select>
+
+
+
+<label>Date</label>
+
+<input
+type="date"
+name="date"
+value="{{transaction.date.strftime('%Y-%m-%d')}}"
+required>
+
+
+
+<label>Notes</label>
+
+<textarea 
+name="notes"
+rows="4"
+placeholder="Add notes">
+
+{{transaction.notes}}
+
+</textarea>
+
+
+<button class="save-btn">
+
+Update
+
+</button>
+
+<br><br>
+
+<a href="/" class="back-btn">
+
+⬅ Back
+
+</a>
+
+</form>
+
+</div>
+
+</body>
+
+</html>

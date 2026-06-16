@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Finance Tracker</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>💰 Personal Finance Tracker</h1>
+<!-- HAMBURGER BUTTON FOR MOBILE -->
+<button class="hamburger" onclick="toggleMenu()">
+☰ Menu
+</button>
+<div class="header-buttons" id="navMenu">
+<button onclick="toggleDarkMode()" class="dark-btn">
+🌙 Dark Mode
+</button>
+<a href="/profile" class="profile-btn">
+👤 {{current_user.username}}
+</a>
+<a href="/export/pdf">
+<button class="pdf-btn">
+📄 PDF
+</button>
+</a>
+<a href="/export/csv">
+<button class="csv-btn">
+📊 CSV
+</button>
+</a>
+<a href="/add">
+<button class="add-btn">
++ Add
+</button>
+</a>
+<a href="/logout">
+<button class="delete">
+Logout
+</button>
+</a>
+</div>
+</div>
+<!-- BUDGET ALERT NOTIFICATION -->
+{% if budget > 0 and warning or exceeded %}
+<div class="budget-alert">
+⚠ Budget Alert!
+<br>
+You spent ₹{{expense}} out of ₹{{budget}}
+<br>
+{% if remaining > 0 %}
+Only ₹{{remaining}} remaining
+{% else %}
+You have crossed your budget by ₹{{-remaining}}
+{% endif %}
+</div>
+{% endif %}
+<!-- SMART SPENDING TIP -->
+{% if spending_tip %}
+<div class="spending-tip">
+💡 Spending Tip
+<br>
+{{spending_tip}}
+</div>
+{% endif %}
+<!-- SEARCH + FILTER -->
+<div class="search-container">
+<form method="GET" action="/" class="search-box">
+<input
+type="text"
+name="search"
+placeholder="🔍 Search transactions..."
+value="{{search}}"
+>
+<select name="category">
+<option value="All">
+All Categories
+</option>
+<option value="Food"
+{% if selected_category=="Food" %}selected{% endif %}>
+Food
+</option>
+<option value="Travel"
+{% if selected_category=="Travel" %}selected{% endif %}>
+Travel
+</option>
+<option value="Education"
+{% if selected_category=="Education" %}selected{% endif %}>
+Education
+</option>
+<option value="Shopping"
+{% if selected_category=="Shopping" %}selected{% endif %}>
+Shopping
+</option>
+<option value="Bills"
+{% if selected_category=="Bills" %}selected{% endif %}>
+Bills
+</option>
+<option value="Entertainment"
+{% if selected_category=="Entertainment" %}selected{% endif %}>
+Entertainment
+</option>
+<option value="Other"
+{% if selected_category=="Other" %}selected{% endif %}>
+Other
+</option>
+</select>
+<button class="search-btn">
+Search
+</button>
+</form>
+</div>
+<!-- SUMMARY CARDS -->
+<div class="cards">
+<div class="card">
+<h3>Income</h3>
+<h1 class="income">
+₹ {{income}}
+</h1>
+</div>
+<div class="card">
+<h3>Expenses</h3>
+<h1 class="expense">
+₹ {{expense}}
+</h1>
+</div>
+<div class="card">
+<h3>Balance</h3>
+<h1>
+₹ {{balance}}
+</h1>
+</div>
+<div class="card">
+<h3>
+📅 This Month Spending
+</h3>
+<h1 class="expense">
+₹ {{month_expense}}
+</h1>
+</div>
+<div class="card">
+<h3>
+📊 Average Daily Expense
+</h3>
+<h1>
+₹ {{average_expense}}
+</h1>
+</div>
+< class="card">
+<h3>
+🏆 Top Category
+</h3>
+<h1>
+{{top_category}}
+</h1>
+</div>
+<div class="budget-box">
+<h2>💰 Monthly Budget</h2>
+<h1>
+₹ {{budget}}
+</h1>
+{% if exceeded %}
+<div class="warning">
+🚫 Alert: You have exceeded your monthly budget!
+</div>
+{% elif warning %}
+<div class="warning">
+⚠ Warning:
+You used 90% of your budget
+</div>
+{% else %}
+<p>
+Your spending is under control 👍
+</p>
+{% endif %}
+<a href="/budget">
+<button class="add-btn">
+Set Budget
+</button>
+</a>
+</div>
+<!-- SAVINGS GOAL -->
+<div class="budget-box">
+<h2>
+🏆 Savings Goal
+</h2>
+{% if goal %}
+<h3>
+{{goal.goal}}
+</h3>
+<h1>
+₹{{goal.saved}} / ₹{{goal.target}}
+</h1>
+<div class="progress">
+<div class="progress-fill"
+style="width:{{progress}}%">
+</div>
+</div>
+<p>
+{{progress}}% Completed
+</p>
+<form method="POST" action="/savings">
+<input type="hidden" name="action" value="topup">
+<input
+type="number"
+name="topup_amount"
+step="0.01"
+placeholder="Add amount"
+required
+>
+<button class="add-btn" type="submit">
+Add to Savings
+</button>
+</form>
+{% else %}
+<p>
+No savings goal set
+</p>
+{% endif %}
+<a href="/savings">
+<button class="add-btn">
+Set Goal
+</button>
+</a>
+</div>
+<!-- CHART -->
+<div class="chart-box">
+<h2>Expense Analysis</h2>
+<canvas id="myChart"></canvas>
+</div>
+<!-- MONTHLY TREND CHART -->
+<div class="chart-box">
+<h2>📈 Monthly Spending Trend</h2>
+<canvas id="trendChart"></canvas>
+</div>
+<!-- TABLE -->
+<div class="table-box">
+<h2>Transactions</h2>
+<table>
+<tr>
+<th>Title</th>
+<th>Amount</th>
+<th>Category</th>
+<th>Type</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+{% for e in expenses %}
+<tr>
+<td>
+{{e.title}}
+</td>
+<td class="money">
+₹{{e.amount}}
+</td>
+<td>
+<span class="tag">
+{{e.category}}
+</span>
+</td>
+<td>
+{% if e.type=="Income" %}
+<span class="income-tag">
+Income
+</span>
+{% else %}
+<span class="expense-tag">
+Expense
+</span>
+{% endif %}
+</td>
+<td>
+{{e.date.strftime('%d-%m-%Y')}}
+</td>
+<td>
+<a class="edit"
+href="/edit/{{e.id}}">
+Edit
+</a>
+<a class="delete"
+href="/delete/{{e.id}}">
+Delete
+</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx=document.getElementById("myChart");
+new Chart(ctx,{
+type:"doughnut",
+data:{
+labels:
+[
+{% for name in categories.keys() %}
+"{{name}}",
+{% endfor %}
+],
+datasets:[{
+data:
+[
+{% for value in categories.values() %}
+{{value}},
+{% endfor %}
+]
+}]
+},
+options:{
+responsive:true
+}
+});
+</script>
+<script>
+const trend = document.getElementById(
+    "trendChart"
+);
+new Chart(trend, {
+type:"bar",
+data:{
+labels:[
+{% for month in monthly_expense.keys() %}
+"{{month}}",
+{% endfor %}
+],
+datasets:[{
+label:"Monthly Expense",
+data:[
+{% for value in monthly_expense.values() %}
+{{value}},
+{% endfor %}
+]
+}]
+},
+options:{
+responsive:true
+}
+});
+</script>
+<script>
+function toggleDarkMode(){
+    document.body.classList.toggle("dark");
+    if(document.body.classList.contains("dark")){
+        localStorage.setItem(
+            "theme",
+            "dark"
+        );
+    }
+    else{
+        localStorage.setItem(
+            "theme",
+            "light"
+        );
+    }
+}
+window.onload=function(){
+    if(
+    localStorage.getItem("theme")=="dark"
+    ){
+        document.body.classList.add("dark");
+    }
+}
+function toggleMenu(){
+    document.getElementById("navMenu").classList.toggle("show");
+}
+</script>
+</body>
+</html>
