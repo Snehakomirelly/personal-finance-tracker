@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Personal Finance Tracker
 
 A full-stack web application that helps users manage their personal finances by tracking income, expenses, budgets, savings goals, and spending habits.
@@ -59,3 +60,7 @@ A full-stack web application that helps users manage their personal finances by 
 
 
 
+=======
+# personal-finance-tracker
+A simple personal finance tracker with savings goals and progress bar.
+>>>>>>> c46d65319076f4a0f12c988475f5f4eed85c3768
